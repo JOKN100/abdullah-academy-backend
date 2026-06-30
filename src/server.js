@@ -17,6 +17,8 @@ dotenv.config();
 // الاتصال بقاعدة البيانات
 connectDB();
 
+const app = express();
+
 // إعدادات الـ CORS للسماح بالطلبات من دومين المنصة فقط
 const allowedOrigins = [
   'http://localhost:3000', // عشان الفرونت إند يشتغل وإنت بتجرب على جهازك
@@ -35,8 +37,6 @@ app.use(cors({
   },
   credentials: true, // مهمة لو بتستخدم Cookies أو Sessions
 }));
-
-const app = express();
 
 // 2. إعدادات الحماية والـ CORS
 app.use(cors({
