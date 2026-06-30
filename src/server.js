@@ -12,7 +12,6 @@ import homeworkRoutes from './routes/homework.routes.js'; // 👈 مسار ال�
 import adminRoutes from './routes/admin.routes.js';
 import packageRoutes from './routes/package.routes.js';
 import teacherRoutes from './routes/teacher.routes.js';
-import cors from 'cors';
 dotenv.config();
 
 // الاتصال بقاعدة البيانات
