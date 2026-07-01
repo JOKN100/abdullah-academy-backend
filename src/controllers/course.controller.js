@@ -4,7 +4,7 @@ import User from '../models/User.js';
 // 1. جلب كل الكورسات (لعرضها في الصفحة الرئيسية للجميع)
 export const getAllCourses = async (req, res) => {
   try {
-    const courses = await Course.find().populate('teacher', 'name profileImage').lean(); 
+    const courses = await Course.find({ isVisible: true }).populate('teacher', 'name profileImage').lean();
     // 💡 دمج بيانات المدرس عشان الفرونت إند القديم ميبُظش
     const formattedCourses = courses.map(c => ({
       ...c,
@@ -203,5 +203,22 @@ export const getLessonViewers = async (req, res) => {
     res.status(200).json({ status: 'success', count: viewers.length, data: viewers });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
+  }
+};
+// دالة إخفاء وإظهار الكورس
+exports.toggleCourseVisibility = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+    if (!course) {
+      return res.status(404).json({ message: "الكورس غير موجود" });
+    }
+    
+    // عكس الحالة (لو ظاهر نخليه مخفي والعكس)
+    course.isVisible = !course.isVisible;
+    await course.save();
+    
+    res.status(200).json({ message: "تم تعديل حالة الكورس بنجاح", course });
+  } catch (error) {
+    res.status(500).json({ message: "حدث خطأ في السيرفر", error });
   }
 };

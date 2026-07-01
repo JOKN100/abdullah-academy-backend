@@ -1,6 +1,10 @@
 import mongoose from 'mongoose';
 
 const courseSchema = new mongoose.Schema({
+  isVisible: {
+  type: Boolean,
+  default: true // عشان أي كورس جديد تضيفه يكون ظاهر تلقائياً
+},
   title: { type: String, required: true },
   description: { type: String, required: true },
   price: { type: Number, required: true },
@@ -19,6 +23,7 @@ const courseSchema = new mongoose.Schema({
     videoUrl: String,
     pdfUrl: String
   }]
+  
 }, { timestamps: true });
 
 export default mongoose.models.Course || mongoose.model('Course', courseSchema);

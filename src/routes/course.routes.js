@@ -24,7 +24,8 @@ const router = express.Router();
 router.get('/', getAllCourses); 
 
 router.use(protect, restrictTo('admin', 'teacher'));
-
+// ضيف السطر ده
+router.patch('/:id/toggle-visibility', courseController.toggleCourseVisibility);
 // 2. مسارات الطلاب (تحتاج تسجيل دخول)
 // جلب بيانات الكورس والدروس للطالب عشان يتفرج عليها
 router.get('/:id/play', protect, playCourse); 
