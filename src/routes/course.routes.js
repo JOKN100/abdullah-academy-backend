@@ -1,6 +1,5 @@
 import express from 'express';
 import { protect, restrictTo } from '../middlewares/auth.middleware.js';
-// استدعاء كل الدوال من الكنترولر (تأكد إن الأسماء دي مطابقة للي جوه الكنترولر عندك)
 import { 
   getAllCourses, 
   getAllAdminCourses, 
@@ -13,45 +12,54 @@ import {
   getMyCourses,
   updateLesson,
   deleteLesson,
-  markLessonComplete, // 💡 ضفنا دي هنا
+  markLessonComplete,
   toggleCourseVisibility
 } from '../controllers/course.controller.js';
 
-// استدعاء ميدل وير الحماية
 const router = express.Router();
 
+// عملنا متغير بيسمح للأدمن والمدرس مع بعض عشان نستخدمه بسهولة
+const allowAdminAndTeacher = restrictTo('admin', 'teacher');
+
+
+// ==========================================
 // 1. المسارات العامة (بدون تسجيل دخول)
-// جلب الكورسات لعرضها في الصفحة الرئيسية (Landing Page)
+// ==========================================
 router.get('/', getAllCourses); 
 
-router.use(protect, restrictTo('admin', 'teacher'));
-// ضيف السطر ده
-router.patch('/:id/toggle-visibility', toggleCourseVisibility);
-// 2. مسارات الطلاب (تحتاج تسجيل دخول)
-// جلب بيانات الكورس والدروس للطالب عشان يتفرج عليها
-router.get('/:id/play', protect, playCourse); 
-// جلب كورسات الطالب المسجل
+
+// ==========================================
+// 2. مسارات الطلاب (تحتاج تسجيل دخول فقط)
+// ==========================================
 router.get('/my-courses', protect, getMyCourses);
-router.get('/enrolled', protect, getMyCourses); // ضفتلك الاسمين احتياطي عشان يشتغل مع شاشة الطالب عندك
-// 3. مسارات الأدمن (تحتاج تسجيل دخول + صلاحية أدمن)
-// تطبيق حماية الأدمن على كل المسارات اللي تحت السطر ده
-router.use(protect, restrictTo('admin'));
-// جلب كل الكورسات للوحة الإدارة
-router.get('/admin/all', getAllAdminCourses); 
-// تفعيل كورس لطالب
-router.post('/admin/enroll', enrollStudent); 
-// إضافة كورس جديد
-router.post('/', createCourse); 
-// إضافة درس جديد لكورس معين
-router.post('/admin/:id/lessons', addLesson); 
-// 🚀 مسارات التعديل والحذف اللي لسه ضايفينها 🚀
-// تعديل بيانات كورس
-router.patch('/:id', updateCourse); 
-// حذف كورس نهائياً
-router.delete('/:id', deleteCourse); 
-// تسجيل درس كمكتمل للطالب
+router.get('/enrolled', protect, getMyCourses);
+router.get('/:id/play', protect, playCourse); 
+// 💡 المسار ده كان مقفول على الطلاب في الكود القديم، دلوقتي رجع يشتغل صح
 router.post('/:courseId/lessons/:lessonId/complete', protect, markLessonComplete);
-// مسارات إدارة درس معين
-router.patch('/admin/:courseId/lessons/:lessonId', updateLesson);
-router.delete('/admin/:courseId/lessons/:lessonId', deleteLesson);
+
+
+// ==========================================
+// 3. مسارات المدرسين والأدمن (إدارة الكورسات)
+// ==========================================
+// جلب الكورسات للوحة الإدارة
+router.get('/admin/all', protect, allowAdminAndTeacher, getAllAdminCourses); 
+
+// إضافة وتعديل وحذف الكورسات
+router.post('/', protect, allowAdminAndTeacher, createCourse); 
+router.patch('/:id', protect, allowAdminAndTeacher, updateCourse); 
+router.delete('/:id', protect, allowAdminAndTeacher, deleteCourse); 
+router.patch('/:id/toggle-visibility', protect, allowAdminAndTeacher, toggleCourseVisibility);
+
+// إضافة وتعديل وحذف الدروس
+router.post('/admin/:id/lessons', protect, allowAdminAndTeacher, addLesson); 
+router.patch('/admin/:courseId/lessons/:lessonId', protect, allowAdminAndTeacher, updateLesson);
+router.delete('/admin/:courseId/lessons/:lessonId', protect, allowAdminAndTeacher, deleteLesson);
+
+
+// ==========================================
+// 4. مسارات التفعيل (Enrollment)
+// ==========================================
+// 💡 خليت المدرس كمان يقدر يفعل الكورس لطلابه، لو عايزها للأدمن بس، خليها restrictTo('admin')
+router.post('/admin/enroll', protect, allowAdminAndTeacher, enrollStudent); 
+
 export default router;
