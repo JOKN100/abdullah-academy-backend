@@ -26,7 +26,7 @@ export const createExam = async (req, res) => {
 // 3. إضافة سؤال للامتحان (للأدمن)
 export const addQuestion = async (req, res) => {
   try {
-    const exam = await Exam.findById(req.params.id);
+    const exam = await Exam.findById(req.params.examId);
     if (!exam) return res.status(404).json({ status: 'fail', message: 'الامتحان غير موجود' });
 
     exam.questions.push(req.body);

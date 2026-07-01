@@ -6,34 +6,38 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// 1. ربط السيرفر بحسابك على Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// 2. إعداد محرك الرفع (Multer)
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: {
-    folder: 'abdullah_academy', // هيعمل فولدر بالاسم ده في حسابك يحط فيه كل الملفات
-    resource_type: 'auto', // عشان يقبل (صور، PDF، فيديوهات)
-    allowed_formats: ['jpg', 'png', 'jpeg', 'pdf', 'mp4']
+  params: async (req, file) => {
+    // 💡 السر هنا: لو الملف PDF هنرفعه كـ Raw عشان يفتح ويتحمل صح
+    if (file.mimetype === 'application/pdf') {
+      return {
+        folder: 'abdullah_academy',
+        resource_type: 'raw' 
+      };
+    }
+    // أما لو صور أو فيديو هنمشيها زي ما إنت عاملها
+    return {
+      folder: 'abdullah_academy',
+      resource_type: 'auto',
+      allowed_formats: ['jpg', 'png', 'jpeg', 'mp4']
+    };
   },
 });
 
 const upload = multer({ storage: storage });
 const router = express.Router();
 
-// 3. المسار اللي الفرونت إند هيبعت عليه الملف
 router.post('/', upload.single('file'), (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ status: 'fail', message: 'لم يتم استلام أي ملف' });
-    }
+    if (!req.file) return res.status(400).json({ status: 'fail', message: 'لم يتم استلام أي ملف' });
     
-    // Cloudinary بيرجع الرابط السحابي الجاهز في req.file.path
     res.status(200).json({ 
       status: 'success', 
       message: 'تم رفع الملف بنجاح!',

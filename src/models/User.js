@@ -12,7 +12,10 @@ const userSchema = new mongoose.Schema({
   activeDeviceToken: { type: String, default: '' },
   
   // 💡 للمدرسين فقط: صورة البروفايل اللي هتظهر على كورساتهم
-  profileImage: { type: String, default: '' },
+  profilePicture: {
+    type: String,
+    default: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' // صورة افتراضية لو المدرس مرفعش صورة
+  },
   
   // للطلاب فقط: تقدمهم في الكورسات
   courseProgress: [{
