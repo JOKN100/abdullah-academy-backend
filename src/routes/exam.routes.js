@@ -10,11 +10,12 @@ router.use(protect);
 // مسار جلب الامتحان (متاح للطالب والأدمن)
 router.get('/lesson/:lessonId', getExamByLesson);
 
+router.post('/', protect, restrictTo('admin', 'teacher'), createExam);
+router.post('/:examId/questions', protect, restrictTo('admin', 'teacher'), addQuestion);
+
 // حماية إضافية (المسارات اللي تحت دي للأدمن فقط)
 router.use(restrictTo('admin'));
 
-router.post('/', createExam); // مسار إنشاء الامتحان
 router.use(protect, restrictTo('admin', 'teacher'));
-router.post('/:id/questions', addQuestion); // مسار إضافة سؤال
 router.post('/:id/submit', protect, submitExamResult);
 export default router;
